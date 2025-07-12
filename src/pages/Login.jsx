@@ -1,3 +1,5 @@
+// src\pages\Login.jsx
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -21,7 +23,12 @@ const Login = () => {
     setMessage('');
 
     try {
-      const res = await axios.post('/api/auth/login', formData, { withCredentials: true });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+        formData,
+        { withCredentials: true }
+      );
+      
       setMessage(res.data.message);
       setIsError(false);
 

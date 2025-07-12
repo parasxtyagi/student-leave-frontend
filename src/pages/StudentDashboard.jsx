@@ -1,4 +1,3 @@
-// frontend/src/pages/StudentDashboard.jsx
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,16 +14,18 @@ import {
   faCalendarAlt,
   faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/AuthContext'; // ⭐ Import useAuth
 
 const StudentDashboard = () => {
+  const { user, setUser } = useAuth(); // ⭐ Get user and setUser from AuthContext
   const [formData, setFormData] = useState({
     reason: '',
     fromDate: '',
     toDate: '',
   });
   const [leaveHistory, setLeaveHistory] = useState([]);
-  const [userName, setUserName] = useState('Student');
-  const [notification, setNotification] = useState({ message: '', type: '' }); // For success/error messages
+  // ⭐ Removed local userName state, now using user.name from context
+  const [notification, setNotification] = useState({ message: '', type: '' });
   const [leaveStats, setLeaveStats] = useState({
     total: 0,
     approved: 0,
@@ -34,14 +35,9 @@ const StudentDashboard = () => {
 
   const navigate = useNavigate();
 
-  // Function to fetch user info and leave stats
-  const fetchDashboardData = async () => {
+  // Function to fetch leave history and stats
+  const fetchLeaveData = async () => { // Renamed from fetchDashboardData as user info is from context
     try {
-      const userRes = await axios.get('/api/auth/me', { withCredentials: true });
-      if (userRes.data && userRes.data.id) {
-        setUserName(userRes.data.name || 'Student');
-      }
-
       const leaveRes = await axios.get('/api/leave/my', { withCredentials: true });
       const leaves = leaveRes.data.leaves || [];
       setLeaveHistory(leaves);
@@ -57,9 +53,11 @@ const StudentDashboard = () => {
         rejected,
       });
     } catch (err) {
-      console.error('Failed to fetch dashboard data:', err);
-      
+      console.error('Failed to fetch leave data:', err);
+
+      // If authentication fails, clear user context and redirect to login
       if (err.response && err.response.status === 401) {
+        setUser(null); // Clear user from context
         navigate('/login');
       }
       showNotification(
@@ -85,16 +83,16 @@ const StudentDashboard = () => {
       showNotification('From Date cannot be after To Date.', 'error');
       return;
     }
-    if (new Date(formData.fromDate) < new Date().setHours(0,0,0,0)) {
-        showNotification('From Date cannot be in the past.', 'error');
-        return;
+    if (new Date(formData.fromDate) < new Date().setHours(0, 0, 0, 0)) {
+      showNotification('From Date cannot be in the past.', 'error');
+      return;
     }
 
     try {
       const res = await axios.post('/api/leave/apply', formData, { withCredentials: true });
       showNotification(res.data.message, 'success');
-      setFormData({ reason: '', fromDate: '', toDate: '' }); 
-      fetchDashboardData(); 
+      setFormData({ reason: '', fromDate: '', toDate: '' });
+      fetchLeaveData(); // Refresh leave history
     } catch (err) {
       showNotification(err.response?.data?.message || 'Leave application failed', 'error');
     }
@@ -103,7 +101,8 @@ const StudentDashboard = () => {
   const handleLogout = async () => {
     try {
       await axios.post('/api/auth/logout', {}, { withCredentials: true });
-      navigate('/login'); 
+      setUser(null); // ⭐ Clear user from context on logout
+      navigate('/login');
     } catch (err) {
       console.error('Logout failed:', err);
       showNotification(err.response?.data?.message || 'Failed to logout', 'error');
@@ -111,8 +110,8 @@ const StudentDashboard = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchLeaveData(); // Fetch leave data on component mount
+  }, [user]); // ⭐ Re-run effect if user context changes (e.g., after login/refresh)
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -169,7 +168,7 @@ const StudentDashboard = () => {
       {/* Dashboard Header */}
       <div className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-lg mb-8">
         <h1 className="text-3xl font-extrabold text-gray-800 flex items-center mb-4 md:mb-0">
-          <FontAwesomeIcon icon={faUserCircle} className="text-indigo-500 mr-3" /> Welcome, {userName}!
+          <FontAwesomeIcon icon={faUserCircle} className="text-indigo-500 mr-3" /> Welcome, {user?.name || 'Student'}!
         </h1>
         <button
           onClick={handleLogout}
@@ -212,7 +211,7 @@ const StudentDashboard = () => {
         <motion.div
           className="bg-white p-5 rounded-xl shadow-md text-center border-l-4 border-red-500"
           initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          animate={{ y: 1, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
           <h4 className="text-md font-semibold text-gray-500">Rejected</h4>

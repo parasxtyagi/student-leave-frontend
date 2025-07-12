@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,6 +14,7 @@ import {
   faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../context/AuthContext'; // ⭐ Import useAuth
+import API from '../utils/axios'; // ⭐ Import the API instance
 
 const StudentDashboard = () => {
   const { user, setUser } = useAuth(); // ⭐ Get user and setUser from AuthContext
@@ -38,7 +38,7 @@ const StudentDashboard = () => {
   // Function to fetch leave history and stats
   const fetchLeaveData = async () => { // Renamed from fetchDashboardData as user info is from context
     try {
-      const leaveRes = await axios.get('/api/leave/my', { withCredentials: true });
+      const leaveRes = await API.get('/api/leave/my', { withCredentials: true }); // ⭐ Updated to API.get
       const leaves = leaveRes.data.leaves || [];
       setLeaveHistory(leaves);
 
@@ -89,7 +89,7 @@ const StudentDashboard = () => {
     }
 
     try {
-      const res = await axios.post('/api/leave/apply', formData, { withCredentials: true });
+      const res = await API.post('/api/leave/apply', formData, { withCredentials: true }); // ⭐ Updated to API.post
       showNotification(res.data.message, 'success');
       setFormData({ reason: '', fromDate: '', toDate: '' });
       fetchLeaveData(); // Refresh leave history
@@ -100,7 +100,7 @@ const StudentDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, { withCredentials: true });
+      await API.post('/api/auth/logout', {}, { withCredentials: true }); // ⭐ Updated to API.post
       setUser(null); // ⭐ Clear user from context on logout
       navigate('/login');
     } catch (err) {

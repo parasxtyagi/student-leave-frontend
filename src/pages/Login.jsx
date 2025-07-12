@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap } from '@fortawesome/free-solid-svg-icons';
+import API from '../utils/axios'; // ⭐ Added API import
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,8 +21,8 @@ const Login = () => {
     setMessage('');
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+      const res = await API.post( // ⭐ Updated to API.post
+        '/auth/login', // ⭐ Removed VITE_BACKEND_URL
         formData,
         { withCredentials: true }
       );

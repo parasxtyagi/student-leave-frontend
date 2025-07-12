@@ -1,35 +1,29 @@
-// src\context\AuthContext.jsx
-
 import { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../utils/axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // On page load, fetch user from token
+  const fetchUser = async () => {
+    try {
+      const res = await API.get('/auth/me');
+      setUser({ name: res.data.name, role: res.data.role });
+    } catch {
+      setUser(null);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-        });
-
-        // ⭐ FIXED: Ensure setUser correctly extracts name and role from res.data.user
-        // Based on the backend's `getUserInfo` sending { user: { id, name, role } }
-        setUser({ name: res.data.user.name, role: res.data.user.role });
-      } catch (error) {
-        console.error("Failed to fetch user on refresh:", error);
-        setUser(null); // Explicitly set user to null on error (e.g., token expired, no token)
-      }
-    };
-
     fetchUser();
-  }, []); // The empty dependency array ensures this runs only once on mount
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, authLoading }}>
       {children}
     </AuthContext.Provider>
   );

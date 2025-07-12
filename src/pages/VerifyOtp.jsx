@@ -1,6 +1,5 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -9,6 +8,7 @@ import {
   faCheckCircle,
   faExclamationCircle
 } from '@fortawesome/free-solid-svg-icons';
+import API from '../utils/axios'; // ⭐ Added API import
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
@@ -59,8 +59,8 @@ const VerifyOtp = () => {
     }
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/verify`,
+      const res = await API.post( // ⭐ Updated to API.post
+        '/auth/verify', // ⭐ Removed VITE_BACKEND_URL
         { email, otp },
         { withCredentials: true }
       );
@@ -78,8 +78,8 @@ const VerifyOtp = () => {
     setCanResend(false);
     setResendTimer(60);
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/resend-otp`,
+      const res = await API.post( // ⭐ Updated to API.post
+        '/auth/resend-otp', // ⭐ Removed VITE_BACKEND_URL
         { email },
         { withCredentials: true }
       );

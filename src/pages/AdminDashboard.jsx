@@ -1,6 +1,5 @@
 // frontend/src/pages/AdminDashboard.jsx
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,10 +17,13 @@ import {
   faTasks,
   faExclamationCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../context/AuthContext'; // ⭐ Import useAuth
+import API from '../utils/axios'; // ⭐ Import the API instance
 
 const AdminDashboard = () => {
+  const { user, setUser } = useAuth(); // ⭐ Get user and setUser from AuthContext
   const [requests, setRequests] = useState([]);
-  const [userName, setUserName] = useState('Admin');
+  // ⭐ Removed local userName state, now using user.name from context
   const [notification, setNotification] = useState({ message: '', type: '' }); // For success/error messages
   const [leaveStats, setLeaveStats] = useState({
     total: 0,
@@ -37,18 +39,14 @@ const AdminDashboard = () => {
     setNotification({ message, type });
     setTimeout(() => {
       setNotification({ message: '', type: '' });
-    }, 4000); 
+    }, 4000);
   };
 
-  // Function to fetch user info and all leave requests
-  const fetchDashboardData = async () => {
+  // Function to fetch all leave requests
+  const fetchLeaveRequests = async () => { // Renamed from fetchDashboardData
     try {
-      const userRes = await axios.get('/api/auth/me', { withCredentials: true });
-      if (userRes.data && userRes.data.id) {
-        setUserName(userRes.data.name || 'Admin');
-      }
-
-      const leaveRes = await axios.get('/api/leave/all', { withCredentials: true });
+      // ⭐ Using API instance for backend calls
+      const leaveRes = await API.get('/leave/all', { withCredentials: true });
       const fetchedRequests = leaveRes.data.leaves || [];
       setRequests(fetchedRequests);
 
@@ -63,13 +61,14 @@ const AdminDashboard = () => {
         rejected,
       });
     } catch (err) {
-      console.error("Failed to fetch dashboard data:", err);
+      console.error("Failed to fetch leave requests:", err);
 
       if (err.response && err.response.status === 401) {
+        setUser(null); // ⭐ Clear user from context if auth fails
         navigate('/login');
       }
       showNotification(
-        err.response?.data?.message || 'Failed to load dashboard data. Please try again.',
+        err.response?.data?.message || 'Failed to load leave requests. Please try again.',
         'error'
       );
     }
@@ -77,9 +76,10 @@ const AdminDashboard = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(`/api/leave/update/${id}`, { status }, { withCredentials: true });
+      // ⭐ Using API instance for backend calls
+      await API.put(`/leave/update/${id}`, { status }, { withCredentials: true });
       showNotification(`Leave request ${status.toLowerCase()} successfully!`, 'success');
-      fetchDashboardData(); 
+      fetchLeaveRequests(); // Refresh requests after update
     } catch (err) {
       showNotification(err.response?.data?.message || `Failed to ${status.toLowerCase()} request.`, 'error');
     }
@@ -87,8 +87,10 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('/api/auth/logout', {}, { withCredentials: true });
-      navigate('/login'); 
+      // ⭐ Using API instance for backend calls
+      await API.post('/auth/logout', {}, { withCredentials: true });
+      setUser(null); // ⭐ Clear user from context on logout
+      navigate('/login');
     } catch (err) {
       console.error("Logout failed:", err);
       showNotification(err.response?.data?.message || "Failed to logout.", 'error');
@@ -96,8 +98,8 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    fetchLeaveRequests(); // Fetch leave data on component mount
+  }, [user]); // ⭐ Re-run effect if user context changes
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -155,8 +157,8 @@ const AdminDashboard = () => {
       {/* Dashboard Header */}
       <div className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-lg mb-8">
         <h1 className="text-3xl font-extrabold text-gray-800 flex items-center mb-4 md:mb-0">
-          <FontAwesomeIcon icon={faUserShield} className="text-indigo-600 mr-3" /> Welcome, {userName}!
-        </h1>
+        <FontAwesomeIcon icon={faUserShield} className="text-indigo-600 mr-3" /> Welcome, {user?.name || 'Admin'}!
+                </h1>
         <button
           onClick={handleLogout}
           className="px-6 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 flex items-center"
@@ -288,7 +290,7 @@ const AdminDashboard = () => {
                             </motion.button>
                           </>
                         )}
-                        
+
                         {leave.status !== "Pending" && (
                           <span className="text-gray-500 text-sm italic">
                             Actioned

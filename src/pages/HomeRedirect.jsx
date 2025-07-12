@@ -1,7 +1,7 @@
 // frontend/src/pages/HomeRedirect.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from '../utils/axios'; // ⭐ Added API import
 
 const HomeRedirect = () => {
   const [checking, setChecking] = useState(true);
@@ -10,7 +10,7 @@ const HomeRedirect = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const res = await axios.get("/api/auth/me", { withCredentials: true });
+        const res = await API.get("/api/auth/me", { withCredentials: true }); // ⭐ Updated to API.get
         const role = res.data?.role;
         if (role === "admin") navigate("/admin");
         else if (role === "student") navigate("/student");

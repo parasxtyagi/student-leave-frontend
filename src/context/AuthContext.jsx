@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -9,7 +8,7 @@ export const AuthProvider = ({ children }) => {
 
   // On page load, fetch user from token
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/user`, { withCredentials: true })
+    axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, { withCredentials: true })
       .then(res => setUser(res.data.user))
       .catch(() => setUser(null));
   }, []);

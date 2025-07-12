@@ -13,18 +13,17 @@ import {
   faCalendarAlt,
   faExclamationCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../context/AuthContext'; // ⭐ Import useAuth
-import API from '../utils/axios'; // ⭐ Import the API instance
+import { useAuth } from '../context/AuthContext';
+import API from '../utils/axios';
 
 const StudentDashboard = () => {
-  const { user, setUser } = useAuth(); // ⭐ Get user and setUser from AuthContext
+  const { user, setUser } = useAuth();
   const [formData, setFormData] = useState({
     reason: '',
     fromDate: '',
     toDate: '',
   });
   const [leaveHistory, setLeaveHistory] = useState([]);
-  // ⭐ Removed local userName state, now using user.name from context
   const [notification, setNotification] = useState({ message: '', type: '' });
   const [leaveStats, setLeaveStats] = useState({
     total: 0,
@@ -35,10 +34,10 @@ const StudentDashboard = () => {
 
   const navigate = useNavigate();
 
-  // Function to fetch leave history and stats
-  const fetchLeaveData = async () => { // Renamed from fetchDashboardData as user info is from context
+  // Fetch leave data
+  const fetchLeaveData = async () => {
     try {
-      const leaveRes = await API.get('/api/leave/my', { withCredentials: true }); // ⭐ Updated to API.get
+      const leaveRes = await API.get('/leave/my');
       const leaves = leaveRes.data.leaves || [];
       setLeaveHistory(leaves);
 
@@ -57,7 +56,7 @@ const StudentDashboard = () => {
 
       // If authentication fails, clear user context and redirect to login
       if (err.response && err.response.status === 401) {
-        setUser(null); // Clear user from context
+        setUser(null);
         navigate('/login');
       }
       showNotification(
@@ -89,7 +88,8 @@ const StudentDashboard = () => {
     }
 
     try {
-      const res = await API.post('/api/leave/apply', formData, { withCredentials: true }); // ⭐ Updated to API.post
+      // 🔴 FIXED: removed '/api'
+      const res = await API.post('/leave/apply', formData);
       showNotification(res.data.message, 'success');
       setFormData({ reason: '', fromDate: '', toDate: '' });
       fetchLeaveData(); // Refresh leave history
@@ -100,8 +100,8 @@ const StudentDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await API.post('/api/auth/logout', {}, { withCredentials: true }); // ⭐ Updated to API.post
-      setUser(null); // ⭐ Clear user from context on logout
+      await API.post('/auth/logout');
+      setUser(null);
       navigate('/login');
     } catch (err) {
       console.error('Logout failed:', err);
@@ -110,8 +110,8 @@ const StudentDashboard = () => {
   };
 
   useEffect(() => {
-    fetchLeaveData(); // Fetch leave data on component mount
-  }, [user]); // ⭐ Re-run effect if user context changes (e.g., after login/refresh)
+    fetchLeaveData();
+  }, [user]);
 
   const getStatusColor = (status) => {
     switch (status) {

@@ -1,0 +1,18 @@
+/* frontend\src\styles\index.css */
+/* frontend/src/styles/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+  }
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }

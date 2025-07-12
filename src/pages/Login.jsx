@@ -30,6 +30,9 @@ const Login = () => {
       setMessage(res.data.message);
       setIsError(false);
 
+      // 🚨 CRUCIAL DEBUGGING STEP: Log the role received from the backend
+      console.log("Logged-in role from backend:", res.data.user.role);
+
       const role = res.data.user.role;
       setTimeout(() => {
         navigate(role === "admin" ? "/admin" : "/student");

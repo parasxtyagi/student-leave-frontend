@@ -26,7 +26,12 @@ const Signup = () => {
     setMessage('');
 
     try {
-      const res = await axios.post('/api/auth/signup', formData);
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/signup`,
+        formData,
+        { withCredentials: true }
+      );
+
       setMessage(res.data.message);
       setIsError(false);
 
@@ -69,7 +74,6 @@ const Signup = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '1.5rem',
-        
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -83,24 +87,8 @@ const Signup = () => {
           type="text"
           placeholder="Full Name"
           onChange={handleChange}
-          style={{
-            width: '100%',
-            border: '1px solid #D1D5DB',
-            padding: '0.875rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '1rem',
-            outline: 'none',
-            transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#10B981';
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.5)';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#D1D5DB';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
           required
+          style={inputStyle}
         />
 
         <input
@@ -108,24 +96,8 @@ const Signup = () => {
           type="email"
           placeholder="University Email"
           onChange={handleChange}
-          style={{
-            width: '100%',
-            border: '1px solid #D1D5DB',
-            padding: '0.875rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '1rem',
-            outline: 'none',
-            transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#10B981';
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.5)';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#D1D5DB';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
           required
+          style={inputStyle}
         />
 
         <input
@@ -133,53 +105,15 @@ const Signup = () => {
           type="password"
           placeholder="Password"
           onChange={handleChange}
-          style={{
-            width: '100%',
-            border: '1px solid #D1D5DB',
-            padding: '0.875rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '1rem',
-            outline: 'none',
-            transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#10B981';
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.5)';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#D1D5DB';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
           required
+          style={inputStyle}
         />
 
         <select
           name="role"
           onChange={handleChange}
           value={formData.role}
-          style={{
-            width: '100%',
-            border: '1px solid #D1D5DB',
-            padding: '0.875rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '1rem',
-            outline: 'none',
-            backgroundColor: '#fff',
-            appearance: 'none',
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 0.75rem center',
-            backgroundSize: '1.5em 1.5em',
-            transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = '#10B981';
-            e.currentTarget.style.boxShadow = '0 0 0 2px rgba(16, 185, 129, 0.5)';
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = '#D1D5DB';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
+          style={inputStyle}
         >
           <option value="student">Student</option>
           <option value="admin">Admin</option>
@@ -206,21 +140,7 @@ const Signup = () => {
           type="submit"
           whileTap={{ scale: 0.98 }}
           whileHover={{ scale: 1.02 }}
-          style={{
-            width: '100%',
-            backgroundColor: '#10B981',
-            color: '#fff',
-            padding: '1rem',
-            borderRadius: '0.5rem',
-            fontWeight: '600',
-            fontSize: '1.125rem',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#10B981'}
+          style={buttonStyle}
         >
           Register
         </motion.button>
@@ -230,14 +150,7 @@ const Signup = () => {
             Already have an account?{' '}
             <Link
               to="/login"
-              style={{
-                color: '#10B981',
-                fontWeight: '600',
-                textDecoration: 'none',
-                transition: 'color 0.2s ease-in-out',
-              }}
-              onMouseOver={(e) => e.currentTarget.style.color = '#059669'}
-              onMouseOut={(e) => e.currentTarget.style.color = '#10B981'}
+              style={linkStyle}
             >
               Log In
             </Link>
@@ -246,6 +159,38 @@ const Signup = () => {
       </form>
     </motion.div>
   );
+};
+
+const inputStyle = {
+  width: '100%',
+  border: '1px solid #D1D5DB',
+  padding: '0.875rem 1rem',
+  borderRadius: '0.5rem',
+  fontSize: '1rem',
+  outline: 'none',
+  backgroundColor: '#fff',
+  transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+};
+
+const buttonStyle = {
+  width: '100%',
+  backgroundColor: '#10B981',
+  color: '#fff',
+  padding: '1rem',
+  borderRadius: '0.5rem',
+  fontWeight: '600',
+  fontSize: '1.125rem',
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'background-color 0.3s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+};
+
+const linkStyle = {
+  color: '#10B981',
+  fontWeight: '600',
+  textDecoration: 'none',
+  transition: 'color 0.2s ease-in-out',
 };
 
 export default Signup;

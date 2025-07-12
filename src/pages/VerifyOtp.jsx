@@ -1,22 +1,25 @@
-// frontend/src/pages/VerifyOtp.jsx
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelopeOpenText, faRedoAlt, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEnvelopeOpenText,
+  faRedoAlt,
+  faCheckCircle,
+  faExclamationCircle
+} from '@fortawesome/free-solid-svg-icons';
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
-  const { state } = useLocation(); // Expects { email: 'user@example.com' }
+  const { state } = useLocation(); // { email: 'user@example.com' }
   const [otp, setOtp] = useState('');
   const [notification, setNotification] = useState({ message: '', type: '' });
-  const [resendTimer, setResendTimer] = useState(60); // 60 seconds for resend
+  const [resendTimer, setResendTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const email = state?.email; // Safely access email
+  const email = state?.email;
 
   useEffect(() => {
-    // Redirect if email is not present in state (e.g., direct access)
     if (!email) {
       navigate('/signup', { replace: true });
       showNotification('Please sign up first to get an OTP.', 'error');
@@ -33,48 +36,57 @@ const VerifyOtp = () => {
     }
 
     return () => clearInterval(timer);
-  }, [email, navigate, resendTimer]); // Added email and navigate to dependency array
+  }, [email, navigate, resendTimer]);
 
   const showNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => {
       setNotification({ message: '', type: '' });
-    }, 4000); // Notification disappears after 4 seconds
+    }, 4000);
   };
 
   const handleVerify = async (e) => {
     e.preventDefault();
+
     if (!email) {
-        showNotification('Email is missing. Please go back to signup.', 'error');
-        return;
+      showNotification('Email is missing. Please go back to signup.', 'error');
+      return;
     }
+
     if (otp.length !== 4) {
-        showNotification('OTP must be exactly 4 digits.', 'error');
-        return;
+      showNotification('OTP must be exactly 4 digits.', 'error');
+      return;
     }
+
     try {
-      const res = await axios.post('/api/auth/verify', {
-        email: email,
-        otp
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/verify`,
+        { email, otp },
+        { withCredentials: true }
+      );
+
       showNotification(res.data.message, 'success');
       setTimeout(() => {
         navigate('/login');
-      }, 1500); // Give user time to read success message
+      }, 1500);
     } catch (err) {
-      showNotification(err.response?.data?.message || "OTP verification failed. Please try again.", 'error');
+      showNotification(err.response?.data?.message || "OTP verification failed.", 'error');
     }
   };
 
   const handleResendOtp = async () => {
     setCanResend(false);
-    setResendTimer(60); // Reset timer
+    setResendTimer(60);
     try {
-      const res = await axios.post('/api/auth/resend-otp', { email: email });
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/resend-otp`,
+        { email },
+        { withCredentials: true }
+      );
       showNotification(res.data.message, 'success');
     } catch (err) {
       showNotification(err.response?.data?.message || 'Failed to resend OTP.', 'error');
-      setCanResend(true); // Allow resend if failed immediately
+      setCanResend(true);
       setResendTimer(0);
     }
   };
@@ -86,7 +98,6 @@ const VerifyOtp = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Notification */}
       <AnimatePresence>
         {notification.message && (
           <motion.div
@@ -115,24 +126,20 @@ const VerifyOtp = () => {
           <h2 className="text-3xl font-extrabold text-gray-900">Verify Your Email</h2>
           <p className="mt-2 text-gray-600 text-md">
             We've sent a 4-digit code to <span className="font-semibold text-indigo-700">{email || 'your email'}</span>.
-            Please enter it below to verify your account.
           </p>
         </div>
 
         <div>
-          <label htmlFor="otp" className="sr-only">Enter OTP</label>
           <input
-            id="otp"
             type="text"
             placeholder="Enter OTP"
-            className="w-full text-center tracking-widest text-2xl font-bold border border-gray-300 p-4 rounded-lg focus:outline-none focus:ring-3 focus:ring-indigo-400 transition-all duration-200 text-gray-800 placeholder-gray-400"
             maxLength={4}
-            pattern="[0-9]{4}" // Enforce numeric and 4 digits
+            pattern="[0-9]{4}"
             onChange={(e) => setOtp(e.target.value)}
             value={otp}
             required
-            autoComplete="off"
-            inputMode="numeric" // Optimize for numeric input on mobile
+            inputMode="numeric"
+            className="w-full text-center tracking-widest text-2xl font-bold border border-gray-300 p-4 rounded-lg focus:outline-none focus:ring-3 focus:ring-indigo-400 transition-all duration-200 text-gray-800 placeholder-gray-400"
           />
         </div>
 

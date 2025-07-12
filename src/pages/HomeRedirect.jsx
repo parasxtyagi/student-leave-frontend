@@ -10,7 +10,7 @@ const HomeRedirect = () => {
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const res = await API.get("/api/auth/me", { withCredentials: true }); // ⭐ Updated to API.get
+        const res = await API.get("/auth/me", { withCredentials: true }); 
         const role = res.data?.role;
         if (role === "admin") navigate("/admin");
         else if (role === "student") navigate("/student");

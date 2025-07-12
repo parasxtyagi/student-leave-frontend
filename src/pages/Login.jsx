@@ -1,5 +1,3 @@
-// src\pages\Login.jsx
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
@@ -28,7 +26,7 @@ const Login = () => {
         formData,
         { withCredentials: true }
       );
-      
+
       setMessage(res.data.message);
       setIsError(false);
 
@@ -71,7 +69,6 @@ const Login = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: '1.5rem',
-          
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>

@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap } from '@fortawesome/free-solid-svg-icons';
-import API from '../utils/axios'; // ⭐ Added API import
+import API from '../utils/axios';
+import { useAuth } from '../context/AuthContext'; 
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth(); // ⭐ Added setUser from useAuth
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
@@ -21,8 +23,8 @@ const Login = () => {
     setMessage('');
 
     try {
-      const res = await API.post( // ⭐ Updated to API.post
-        '/auth/login', // ⭐ Removed VITE_BACKEND_URL
+      const res = await API.post(
+        '/auth/login',
         formData,
         { withCredentials: true }
       );
@@ -30,13 +32,17 @@ const Login = () => {
       setMessage(res.data.message);
       setIsError(false);
 
+      // ⭐ Set user in context immediately (so ProtectedRoute recognizes login)
+      setUser(res.data.user);
+
       // 🚨 CRUCIAL DEBUGGING STEP: Log the role received from the backend
       console.log("Logged-in role from backend:", res.data.user.role);
 
       const role = res.data.user.role;
       setTimeout(() => {
         navigate(role === "admin" ? "/admin" : "/student");
-      }, 1500);
+      }, 800); // ⭐ Changed timeout to 800ms
+
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Login failed. Please check your credentials.";
       setMessage(errorMessage);

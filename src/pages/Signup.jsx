@@ -1,3 +1,5 @@
+// src\pages\Signup.jsx
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
